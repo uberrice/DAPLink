@@ -86,7 +86,7 @@ This information includes:
 /// debugger and depends on the USB peripheral. Typical vales are 64 for Full-speed USB HID or WinUSB,
 /// 1024 for High-speed USB HID and 512 for High-speed USB WinUSB.
 #ifndef HID_ENDPOINT            //HID end points currently set limits to 64
-#define DAP_PACKET_SIZE         512              ///< Specifies Packet Size in bytes.
+#define DAP_PACKET_SIZE         8192              ///< Specifies Packet Size in bytes.
 #else
 #define DAP_PACKET_SIZE         64              ///< Specifies Packet Size in bytes.
 #endif

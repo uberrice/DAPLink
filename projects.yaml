@@ -75,7 +75,7 @@ module:
         - records/rtos/rtos-cm33.yaml
         - records/hic_hal/lpc55s69.yaml
         - records/usb/usb-bulk.yaml
-        - records/usb/usb-hid.yaml
+#        - records/usb/usb-hid.yaml
     hic_m48ssidae: &module_hic_m48ssidae
         - records/rtos/rtos-cm4.yaml
         - records/hic_hal/m48ssidae.yaml

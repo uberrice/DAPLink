@@ -40,6 +40,7 @@
 #include "flash_manager.h"
 #include <string.h>
 #include "daplink_vendor_commands.h"
+#include "mat_vendor_commands.h"
 
 #ifdef DRAG_N_DROP_SUPPORT
 #include "file_stream.h"
@@ -62,6 +63,9 @@ file to the MDK-ARM project under the file group Configuration.
 \return          number of bytes in response (lower 16 bits)
                  number of bytes in request (upper 16 bits)
 */
+
+const char *testStr = "1234567890";
+
 uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
   uint32_t num = (1U << 16) | 1U;
 
@@ -204,7 +208,18 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor28: break;
     case ID_DAP_Vendor29: break;
     case ID_DAP_Vendor30: break;
-    case ID_DAP_Vendor31: break;
+    case ID_DAP_TestCommand: {
+        uint16_t len = strlen(testStr);
+        *response++ = len;
+        for (uint16_t i = 0; i < 810; i++)
+        {
+            memcpy(response, testStr, len);
+            response+=(len);
+            num+=len;
+        }
+        num++; // length byte
+        break;
+    }
     default: break;
   }
 
