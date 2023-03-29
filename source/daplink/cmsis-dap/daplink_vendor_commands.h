@@ -22,6 +22,21 @@
 
 #include "DAP.h"
 
+#define RTT_SCAN_BLOCK_SIZE (0x100)
+#define RTT_SCAN_REQUESTS (RTT_SCAN_BLOCK_SIZE/4)
+#define RTT_SCAN_STRIDE     (0x080)
+
+// TODO: scan request as constant array?
+const uint8_t rtt_scan_request[] = [0x00, 0x40, 0x03]
+
+
+typedef struct _rtt_config {
+    uint32_t startAddr;
+    uint32_t range;
+} rtt_config;
+
+const char * rtt_header = "SEGGER RTT";
+
 //! @name DAPLink vendor-specific CMSIS-DAP command IDs
 //@{
 #define ID_DAP_GetUniqueID              ID_DAP_Vendor0
