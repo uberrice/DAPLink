@@ -210,25 +210,7 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor26: break;
     case ID_DAP_Vendor27: break;
     case ID_DAP_Vendor28: break;
-    case ID_DAP_Vendor29: { // RTT init
-        // configure transfer?
-        // locate control block
-        for(uint32_t offset = 0; 
-            offset < DAP_rtt_config.range; 
-            offset += RTT_SCAN_STRIDE) {
-        uint8_t request[] = [RTT_SCAN_BLOCK_SIZE];
-        // prepare request data
-        // Format: 
-        // 1 byte: DAP Index (ignored for SWD)
-        // 2 byte: count (32-bit values)
-        // Info byte: DAP Access Port, Read Register; 0b11000000 - 0xC0 (maybe other way around, 0x03, test)
-        // probably 0x03
-        DAP_TransferBlock(rtt_scan_request, rtt_search_buf);
-        //read block at addr+Offset into memory
-        //check if chunk contains rtt_header
-        }
-        break;
-    }
+    case ID_DAP_Vendor29: break;
     case ID_DAP_Vendor30: break;
     case ID_DAP_Vendor31: break;
 
