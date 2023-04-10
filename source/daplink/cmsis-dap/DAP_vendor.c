@@ -40,6 +40,7 @@
 #include "flash_manager.h"
 #include <string.h>
 #include "daplink_vendor_commands.h"
+#include "DAP_RTT.h"
 
 #ifdef DRAG_N_DROP_SUPPORT
 #include "file_stream.h"
@@ -62,14 +63,6 @@ file to the MDK-ARM project under the file group Configuration.
 \return          number of bytes in response (lower 16 bits)
                  number of bytes in request (upper 16 bits)
 */
-
-static rtt_config DAP_rtt_config = {
-    .range = 0x10000,
-    .startAddr = 0x20000000
-};
-
-static uint8_t rtt_search_buf[RTT_SCAN_BLOCK_SIZE];
-
 uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
   uint32_t num = (1U << 16) | 1U;
 
@@ -211,9 +204,18 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor27: break;
     case ID_DAP_Vendor28: break;
     case ID_DAP_Vendor29: break;
-    case ID_DAP_Vendor30: break;
+    case ID_DAP_Vendor30: {
+        uint32_t found = RTT_find_control_block(0x20000000,0x40000);
+        *response++ = 4;
+        *response++ = found>>24;
+        *response++ = found>>16;
+        *response++ = found>>8;
+        *response++ = found;
+        num += 5; // increment response count by ID length + length byte
+        break;
+    }
     case ID_DAP_Vendor31: break;
-
+  }
   return (num);
 }
 
