@@ -2,9 +2,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define RTT_MSG_BUF_SIZE (256)
+#define RTT_MSG_BUF_SIZE (512)
 
-#define RTT_HEADER_LENGTH (11)
+#define RTT_HEADER_LENGTH (12)
 
 
 #define RTT_CB_NOT_FOUND (0xFFFFFFFF)
@@ -13,6 +13,7 @@
 typedef struct {
     uint32_t scan_start_address;
     uint32_t scan_range;
+    uint32_t cb_address;
 } rtt_config_t;
 
 typedef struct {
