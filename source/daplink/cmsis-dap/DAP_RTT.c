@@ -9,7 +9,7 @@
 
 const uint8_t rtt_header[] = "SEGGER RTT";
 static uint8_t rtt_msg_buf[RTT_MSG_BUF_SIZE+4];
-uint8_t rtt_request_buf[10];
+uint8_t rtt_request_buf[6];
 
 static rtt_config_t rtt_config = {
     .scan_start_address = 0x20000000,
@@ -36,10 +36,22 @@ uint32_t readBlocks(uint16_t blocks, uint8_t * response) {
 uint32_t transfer_mem32_block(uint32_t address, uint16_t blocks, uint8_t * response) {
     DAP_TransferAbort = 0U;
 
-    swd_write_ap(AP_CSW, CSW_SIZE32 | CSW_ADDRINC | CSW_DBGSTAT | CSW_RESERVED | CSW_HPROT | CSW_MSTRTYPE); // set up CSW (remembers state)
+    swd_write_ap(AP_CSW, CSW_SIZE32 | CSW_ADDRINC | CSW_DBGSTAT | CSW_HPROT | CSW_MSTRTYPE); // set up CSW (remembers state)
     swd_write_ap(AP_TAR, address); //set address
+    uint32_t data;
+    for (int16_t i = 0; i < blocks; i++)
+    {
+        // if( swd_read_ap(AP_DRW, &data) ){
+        //     *response++ = (uint8_t) data;
+        //     *response++ = (uint8_t)(data >>  8);
+        //     *response++ = (uint8_t)(data >> 16);
+        //     *response++ = (uint8_t)(data >> 24);
+        // }
+        readBlocks(blocks, response);
+    }
+    
 
-    return readBlocks(blocks, response); // read x amount of blocks
+    //return readBlocks(blocks, response); // read x amount of blocks
 }
 
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/python
 #
 # DAPLink Interface Firmware
 # Copyright (c) 2009-2020, ARM Limited, All Rights Reserved

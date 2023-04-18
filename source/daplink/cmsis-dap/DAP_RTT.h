@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define RTT_MSG_BUF_SIZE (512)
+#define RTT_MSG_BUF_SIZE (128)
 
 #define RTT_HEADER_LENGTH (12)
 

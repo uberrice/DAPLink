@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/python
 # DAPLink Interface Firmware
 # Copyright (c) 2009-2019, ARM Limited, All Rights Reserved
 # SPDX-License-Identifier: Apache-2.0
