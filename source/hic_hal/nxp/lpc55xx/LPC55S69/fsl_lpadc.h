@@ -9,6 +9,7 @@
 #define _FSL_LPADC_H_
 
 #include "fsl_common.h"
+#include "LPC55S69_cm33_core0_features.h" // TEMP for testing
 
 /*!
  * @addtogroup lpadc

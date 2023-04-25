@@ -42,6 +42,8 @@
 #include "daplink_vendor_commands.h"
 #include "mat_vendor_commands.h"
 
+#include "lpadc.h"
+
 #ifdef DRAG_N_DROP_SUPPORT
 #include "file_stream.h"
 #endif
@@ -207,7 +209,14 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor27: break;
     case ID_DAP_Vendor28: break;
     case ID_DAP_Vendor29: break;
-    case ID_DAP_Vendor30: break;
+    case ID_DAP_Vendor30: { // VENDOR 30: Current Measurement test
+        // TODO: Implement polling LPADC conversion and return
+        uint16_t res = LPADC_polling_current_read();
+        *response++ = res>>8;
+        *response++ = (res & 0xFF);
+        num+=2;
+        break;
+    }
     case ID_DAP_TestCommand: {
         uint16_t len = strlen(testStr);
         *response++ = len;

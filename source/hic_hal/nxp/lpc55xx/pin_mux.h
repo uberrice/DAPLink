@@ -30,6 +30,15 @@
 #define IOCON_PIO_DIGITAL_EN 0x0100u  /*!<@brief Enables digital function */
 //@}
 
+//!@brief LPADC0 pin config constants
+//@{
+#define PIO0_16_ASW_VALUE1 0x01u
+#define PIO0_16_DIGIMODE_ANALOG 0x00u
+#define PIO0_16_FUNC_ALT0 0x00u
+#define PIO0_16_MODE_INACTIVE 0x00u
+//@}
+
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -50,6 +59,10 @@ void USART3_DeinitPins(void);
 
 //! @brief Configure VBUS pin.
 void init_vbus_pin(void);
+
+//! @brief LPADC0 pin initialization
+void LPADC0_InitPins(void);
+
 
 #if defined(__cplusplus)
 }
