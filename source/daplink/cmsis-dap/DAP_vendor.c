@@ -65,6 +65,8 @@ file to the MDK-ARM project under the file group Configuration.
 */
 
 const char *testStr = "1234567890";
+char call = '0';
+
 
 uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
   uint32_t num = (1U << 16) | 1U;
@@ -211,12 +213,13 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_TestCommand: {
         uint16_t len = strlen(testStr);
         *response++ = len;
-        for (uint16_t i = 0; i < 810; i++)
-        {
-            memcpy(response, testStr, len);
-            response+=(len);
-            num+=len;
-        }
+        // for (uint16_t i = 0; i < 50; i++)
+        // {
+            //memcpy(response, testStr, len);
+            *response++ = call++;
+            //response+=(len);
+            num+=1;
+        // }
         num++; // length byte
         break;
     }
