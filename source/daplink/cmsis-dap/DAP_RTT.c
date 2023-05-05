@@ -129,10 +129,8 @@ uint32_t RTT_find_cb_in_buf(uint8_t *buf)
     }
     return RTT_CB_NOT_FOUND;
 }
-// TODO: connect to SWD somehow? Seemingly it's not properly connecting and thus returning an almost empty buffer. Currently getting 'No response from target'
 uint32_t RTT_find_control_block(uint32_t start_addr, uint32_t addr_range)
 {
-    // if (rtt_config.cb_address != 0)
     if (0)
     {
         return rtt_config.cb_address;
