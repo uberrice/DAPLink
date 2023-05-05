@@ -53,6 +53,25 @@ uint32_t transfer_mem32_block(uint32_t address, uint16_t blocks, uint8_t *respon
     // return readBlocks(blocks, response); // read x amount of blocks
 }
 
+
+uint32_t RTT_find_cb_in_buf(uint8_t* buf){
+    uint8_t flag = 1;
+    for (uint32_t i = 0; i < RTT_MSG_BUF_SIZE - strlen(rtt_header); i++)
+    {
+        flag = 1;
+        for (uint16_t j = 0; j < strlen(rtt_header); j++)
+        {
+            if(buf[i+j] != rtt_header[j]){
+                flag = 0;
+                break;
+            }
+        }
+        if(flag==1){
+            return i;
+        }
+    }
+    return RTT_CB_NOT_FOUND;
+}
 // TODO: connect to SWD somehow? Seemingly it's not properly connecting and thus returning an almost empty buffer. Currently getting 'No response from target'
 uint32_t RTT_find_control_block(uint32_t start_addr, uint32_t addr_range)
 {
@@ -62,16 +81,17 @@ uint32_t RTT_find_control_block(uint32_t start_addr, uint32_t addr_range)
     }
     else
     {
-        unsigned char *result;
+        uint32_t rtt_cb_position = RTT_CB_NOT_FOUND;
         for (uint32_t i = start_addr;
              i < (start_addr + addr_range);
-             i += RTT_MSG_BUF_SIZE - RTT_HEADER_LENGTH) // minus header length for overlap (Header between blocks)
+             i += (RTT_MSG_BUF_SIZE - RTT_HEADER_LENGTH)) // minus header length for overlap (Header between blocks)
         {
             uint32_t transfer_error = transfer_mem32_block(i, RTT_MSG_BUF_SIZE / 4, rtt_msg_buf);
-            result = strstr(rtt_msg_buf, rtt_header);
-            if (result != NULL)
+
+            rtt_cb_position = RTT_find_cb_in_buf(rtt_msg_buf);
+            if (rtt_cb_position != RTT_CB_NOT_FOUND)
             { // header found!
-                uint32_t rtt_cb_address = i + (result - rtt_msg_buf);
+                uint32_t rtt_cb_address = i + rtt_cb_position;
                 rtt_config.cb_address = rtt_cb_address;
                 return rtt_cb_address;
             }

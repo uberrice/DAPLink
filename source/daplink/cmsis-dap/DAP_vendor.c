@@ -205,7 +205,7 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor28: break;
     case ID_DAP_Vendor29: break;
     case ID_DAP_Vendor30: {
-        uint32_t found = RTT_find_control_block(0x20000000,0x40000);
+        uint32_t found = RTT_find_control_block(0x10000000,0x4000);
         *response++ = 4;
         *response++ = found>>24;
         *response++ = found>>16;
