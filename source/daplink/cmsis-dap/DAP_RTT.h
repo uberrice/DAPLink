@@ -2,9 +2,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define RTT_MSG_BUF_SIZE (128)
-
+#define RTT_MSG_BUF_SIZE (512)
 #define RTT_HEADER_LENGTH (12)
+#define RTT_MAX_NUM_UP_BUFFERS (8)
+#define RTT_MAX_NUM_DOWN_BUFFERS (8)
 
 #define RTT_CB_NOT_FOUND (0xFFFFFFFF)
 
@@ -25,6 +26,7 @@ typedef struct
 
 typedef struct
 {
+    char *sName;           // Pointer to name of buffer
     char *pBuffer;         // Pointer to the buffer
     uint32_t SizeOfBuffer; // Size of the buffer
     uint32_t WrOff;        // Write position
