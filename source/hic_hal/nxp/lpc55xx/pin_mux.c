@@ -246,4 +246,12 @@ void LPADC0_InitPins(void){
     };
     /* Initialize GPIO functionality on pin PIO1_29 (pin 80)  */
     GPIO_PinInit(GPIO, 1U, 29U, &ctrl_cal_r4_config);
+
+    IOCON->PIO[0][17] = IOCON_FUNC0 | IOCON_DIGITAL_EN;
+    IOCON->PIO[0][29] = IOCON_FUNC0 | IOCON_DIGITAL_EN;
+    IOCON->PIO[1][22] = IOCON_FUNC0 | IOCON_DIGITAL_EN;
+    IOCON->PIO[1][23] = IOCON_FUNC0 | IOCON_DIGITAL_EN;
+    IOCON->PIO[1][24] = IOCON_FUNC0 | IOCON_DIGITAL_EN;
+    IOCON->PIO[1][26] = IOCON_FUNC0 | IOCON_DIGITAL_EN;
+    IOCON->PIO[1][29] = IOCON_FUNC0 | IOCON_DIGITAL_EN;
 }

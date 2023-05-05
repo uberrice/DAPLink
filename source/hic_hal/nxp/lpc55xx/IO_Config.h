@@ -150,6 +150,16 @@ COMPILER_ASSERT(DAPLINK_HIC_ID == DAPLINK_HIC_ID_LPC55XX);
 // LED_E: LED_VCOM_ACT       PIO1_15  GPO (LED4 Green)       VCOM activity
 // LED_F: LED_USB_COMM       PIO1_12  GPO (LED1 Green)       USB communication
 // LED_G: LED_HEARTBEAT      PIO1_16  GPO (LED5 Green)       FUNC
+//
+// CTRL_HIGH_CURR:           PIO0_30  GPI                    Monitor current measuring range
+// CTRL_HIGH_CURR_EN:        PIO0_17  GPO                    Clock input to U18 (rising edge to get high sensitivity)
+// CTRL_HIGH_CUR_DIS:        PIO0_29  GPO                    Master Reset input to U18 (high to get low sensitivity)
+//
+// CTRL_CAL_DISC             PIO1_24  GPO                    Disconnect target from power measurement circuit for calibration (High active)
+// CTRL_CAL_R1               PIO1_22  GPO                    Turn on or off CAL_R1 connection (High = connected)
+// CTRL_CAL_R2               PIO1_23  GPO                    Turn on or off CAL_R2 connection (High = connected)
+// CTRL_CAL_R3               PIO1_26  GPO                    Turn on or off CAL_R3 connection (High = connected)
+// CTRL_CAL_R4               PIO1_29  GPO                    Turn on or off CAL_R4 connection (High = connected)
 
 #define LED_B_PORT              (1U)
 #define LED_B_PIN               (17U)
@@ -186,6 +196,39 @@ COMPILER_ASSERT(DAPLINK_HIC_ID == DAPLINK_HIC_ID_LPC55XX);
 #define PIN_HW_VERS_4_PORT      (1U)
 #define PIN_HW_VERS_4           (5U)
 #define PIN_HW_VERS_4_MASK      (1U << PIN_HW_VERS_4)
+
+
+#define CTRL_HIGH_CURR_PORT (0U)
+#define CTRL_HIGH_CURR_PIN  (30U)
+#define CTRL_HIGH_CURR_MASK (1U << CTRL_HIGH_CURR_PIN)
+
+#define CTRL_HIGH_CURR_EN_PORT (0U)
+#define CTRL_HIGH_CURR_EN_PIN  (17U)
+#define CTRL_HIGH_CURR_EN_MASK (1U << CTRL_HIGH_CURR_EN_PIN)
+
+#define CTRL_HIGH_CURR_DIS_PORT (0U)
+#define CTRL_HIGH_CURR_DIS_PIN  (29U)
+#define CTRL_HIGH_CURR_DIS_MASK (1U << CTRL_HIGH_CURR_DIS_PIN)
+
+#define CTRL_CAL_DISC_PORT (1U)
+#define CTRL_CAL_DISC_PIN  (24U)
+#define CTRL_CAL_DISC_MASK (1U << CTRL_CAL_DISC_PIN)
+
+#define CTRL_CAL_R1_PORT (1U)
+#define CTRL_CAL_R1_PIN  (22U)
+#define CTRL_CAL_R1_MASK (1U << CTRL_CAL_R1_PIN)
+
+#define CTRL_CAL_R2_PORT (1U)
+#define CTRL_CAL_R2_PIN  (23U)
+#define CTRL_CAL_R2_MASK (1U << CTRL_CAL_R2_PIN)
+
+#define CTRL_CAL_R3_PORT (1U)
+#define CTRL_CAL_R3_PIN  (26U)
+#define CTRL_CAL_R3_MASK (1U << CTRL_CAL_R3_PIN)
+
+#define CTRL_CAL_R4_PORT (1U)
+#define CTRL_CAL_R4_PIN  (29U)
+#define CTRL_CAL_R4_MASK (1U << CTRL_CAL_R4_PIN)
 
 typedef enum led_types {
     LED_T_CONNECTED = 1 << 0,

@@ -24,6 +24,7 @@
 #include "DAP_config.h"
 #include "gpio.h"
 #include "cmsis_os2.h"
+#include "lpadc.h"
 
 static bool s_mcu_link_pro = false;
 
@@ -82,6 +83,7 @@ void board_gpio_init()
         gpio_set_leds(j, GPIO_LED_OFF);
 #endif
     }
+    LPADC0_InitPins();
 }
 
 __WEAK void gpio_set_leds(uint32_t leds, gpio_led_state_t state)

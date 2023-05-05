@@ -211,6 +211,18 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor29: break;
     case ID_DAP_Vendor30: { // VENDOR 30: Current Measurement test
         // TODO: Implement polling LPADC conversion and return
+        uint8_t resstate = *request++;
+        uint8_t currstate = *request;
+        set_TargetPowerDisconnect(true);
+        if(currstate == 0)
+        {
+            set_LPADC0_currentMode(LPADC_current_low_sens);
+        }
+        else
+        {
+            set_LPADC0_currentMode(LPADC_current_high_sens);
+        }
+        set_CalibrationResistorState(resstate);
         uint16_t res = LPADC_polling_current_read();
         *response++ = res>>8;
         *response++ = (res & 0xFF);
