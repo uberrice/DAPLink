@@ -87,7 +87,7 @@ uint32_t RTT_swd_read_uint32_word(uint32_t address, uint32_t * data) // TODO Tes
     uint32_t response;
     do
     {
-        response = SWD_Transfer(DAP_TRANSFER_RnW | DAP_TRANSFER_APnDP | AP_DRW, &data); // read DRW register
+        response = SWD_Transfer(DAP_TRANSFER_RnW | DAP_TRANSFER_APnDP | AP_DRW, data); // read DRW register
     } while ((response == DAP_TRANSFER_WAIT) && retry-- && !DAP_TransferAbort);
     if (response != DAP_TRANSFER_OK)
     {
