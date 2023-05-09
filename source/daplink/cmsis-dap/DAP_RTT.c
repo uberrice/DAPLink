@@ -72,32 +72,31 @@ uint32_t RTT_read_control_block(uint32_t rtt_cb_address)
         return RTT_FAILURE;
     }
     uint32_t transfer_error = transfer_mem32_block(rtt_cb_address + 16, 2, rtt_msg_buf);
-    uint8_t *buf_ptr = rtt_transfer_contents;
 
     // Number of Buffers
-    RTT_control_block.MaxNumUpBuffers = deserialize_uint32(buf_ptr);
-    RTT_control_block.MaxNumDownBuffers = deserialize_uint32(buf_ptr + 4);
+    RTT_control_block.MaxNumUpBuffers = deserialize_uint32(rtt_transfer_contents);
+    RTT_control_block.MaxNumDownBuffers = deserialize_uint32(rtt_transfer_contents + 4);
 
     // Initialize Buffers
     for (uint32_t i = 0; i < RTT_control_block.MaxNumUpBuffers; i++)
     {
         transfer_error = transfer_mem32_block(rtt_cb_address + 24 + (i * 24), 6, rtt_msg_buf);
-        RTT_UpBuffers[i].sName = (char *)deserialize_uint32(buf_ptr);
-        RTT_UpBuffers[i].pBuffer = (char *)deserialize_uint32(buf_ptr + 4);
-        RTT_UpBuffers[i].SizeOfBuffer = deserialize_uint32(buf_ptr + 8);
-        RTT_UpBuffers[i].WrOff = deserialize_uint32(buf_ptr + 12);
-        RTT_UpBuffers[i].RdOff = deserialize_uint32(buf_ptr + 16);
-        RTT_UpBuffers[i].Flags = deserialize_uint32(buf_ptr + 20);
+        RTT_UpBuffers[i].sName = (char *)deserialize_uint32(rtt_transfer_contents);
+        RTT_UpBuffers[i].pBuffer = (char *)deserialize_uint32(rtt_transfer_contents + 4);
+        RTT_UpBuffers[i].SizeOfBuffer = deserialize_uint32(rtt_transfer_contents + 8);
+        RTT_UpBuffers[i].WrOff = deserialize_uint32(rtt_transfer_contents + 12);
+        RTT_UpBuffers[i].RdOff = deserialize_uint32(rtt_transfer_contents + 16);
+        RTT_UpBuffers[i].Flags = deserialize_uint32(rtt_transfer_contents + 20);
     }
     for (uint32_t i = 0; i < RTT_control_block.MaxNumDownBuffers; i++)
     {
         transfer_error = transfer_mem32_block(rtt_cb_address + 24 + (24 * RTT_control_block.MaxNumUpBuffers) + (i * 24), 6, rtt_msg_buf);
-        RTT_DownBuffers[i].sName = (char *)deserialize_uint32(buf_ptr);
-        RTT_DownBuffers[i].pBuffer = (char *)deserialize_uint32(buf_ptr + 4);
-        RTT_DownBuffers[i].SizeOfBuffer = deserialize_uint32(buf_ptr + 8);
-        RTT_DownBuffers[i].WrOff = deserialize_uint32(buf_ptr + 12);
-        RTT_DownBuffers[i].RdOff = deserialize_uint32(buf_ptr + 16);
-        RTT_DownBuffers[i].Flags = deserialize_uint32(buf_ptr + 20);
+        RTT_DownBuffers[i].sName = (char *)deserialize_uint32(rtt_transfer_contents);
+        RTT_DownBuffers[i].pBuffer = (char *)deserialize_uint32(rtt_transfer_contents + 4);
+        RTT_DownBuffers[i].SizeOfBuffer = deserialize_uint32(rtt_transfer_contents + 8);
+        RTT_DownBuffers[i].WrOff = deserialize_uint32(rtt_transfer_contents + 12);
+        RTT_DownBuffers[i].RdOff = deserialize_uint32(rtt_transfer_contents + 16);
+        RTT_DownBuffers[i].Flags = deserialize_uint32(rtt_transfer_contents + 20);
     }
     return RTT_OK;
 }
