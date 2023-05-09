@@ -12,11 +12,7 @@ static uint8_t rtt_msg_buf[RTT_MSG_BUF_SIZE + 4];
 static uint8_t *rtt_transfer_contents = rtt_msg_buf + 4;
 static SEGGER_RTT_BUFFER RTT_UpBuffers[RTT_MAX_NUM_UP_BUFFERS];
 static SEGGER_RTT_BUFFER RTT_DownBuffers[RTT_MAX_NUM_DOWN_BUFFERS];
-
-static rtt_config_t rtt_config = {
-    .scan_start_address = 0x10000000,
-    .scan_range = 0x1000,
-    .cb_address = 0};
+static SEGGER_RTT_CB RTT_control_block;
 
 uint32_t deserialize_uint32(uint8_t *buf)
 {
@@ -56,23 +52,34 @@ uint32_t transfer_mem32_block(uint32_t address, uint16_t blocks, uint8_t *respon
     readBlocks(blocks, response);
 }
 
-uint32_t RTT_read_control_block(uint32_t rtt_cb_address)
+uint32_t RTT_check_control_block(uint32_t rtt_cb_address)
 {
-    uint32_t transfer_error = transfer_mem32_block(rtt_cb_address, 6, rtt_msg_buf);
-    uint8_t *buf_ptr = rtt_transfer_contents;
+    uint32_t transfer_error = transfer_mem32_block(rtt_cb_address, 4, rtt_msg_buf);
     for (uint32_t i = 0; i < 16; i++)
     {
-        if (buf_ptr[i] != rtt_header[i])
+        if (rtt_transfer_contents[i] != rtt_header[i])
         {
             return RTT_FAILURE;
         }
     }
+    return RTT_OK;
+}
+
+uint32_t RTT_read_control_block(uint32_t rtt_cb_address)
+{
+    if (RTT_check_control_block(rtt_cb_address) != RTT_OK)
+    {
+        return RTT_FAILURE;
+    }
+    uint32_t transfer_error = transfer_mem32_block(rtt_cb_address + 16, 2, rtt_msg_buf);
+    uint8_t *buf_ptr = rtt_transfer_contents;
+
     // Number of Buffers
-    uint32_t num_up_buf = deserialize_uint32(buf_ptr + 16);
-    uint32_t num_down_buf = deserialize_uint32(buf_ptr + 20);
+    RTT_control_block.MaxNumUpBuffers = deserialize_uint32(buf_ptr);
+    RTT_control_block.MaxNumDownBuffers = deserialize_uint32(buf_ptr + 4);
 
     // Initialize Buffers
-    for (uint32_t i = 0; i < num_up_buf; i++)
+    for (uint32_t i = 0; i < RTT_control_block.MaxNumUpBuffers; i++)
     {
         transfer_error = transfer_mem32_block(rtt_cb_address + 24 + (i * 24), 6, rtt_msg_buf);
         RTT_UpBuffers[i].sName = (char *)deserialize_uint32(buf_ptr);
@@ -82,9 +89,9 @@ uint32_t RTT_read_control_block(uint32_t rtt_cb_address)
         RTT_UpBuffers[i].RdOff = deserialize_uint32(buf_ptr + 16);
         RTT_UpBuffers[i].Flags = deserialize_uint32(buf_ptr + 20);
     }
-    for (uint32_t i = 0; i < num_down_buf; i++)
+    for (uint32_t i = 0; i < RTT_control_block.MaxNumDownBuffers; i++)
     {
-        transfer_error = transfer_mem32_block(rtt_cb_address + 24 + (24 * num_up_buf) + (i * 24), 6, rtt_msg_buf);
+        transfer_error = transfer_mem32_block(rtt_cb_address + 24 + (24 * RTT_control_block.MaxNumUpBuffers) + (i * 24), 6, rtt_msg_buf);
         RTT_DownBuffers[i].sName = (char *)deserialize_uint32(buf_ptr);
         RTT_DownBuffers[i].pBuffer = (char *)deserialize_uint32(buf_ptr + 4);
         RTT_DownBuffers[i].SizeOfBuffer = deserialize_uint32(buf_ptr + 8);
@@ -102,7 +109,6 @@ uint32_t test_RTT_readBuf1(void)
 
 uint32_t RTT_readBufs(void)
 {
-    
 }
 
 uint32_t RTT_find_cb_in_buf(uint8_t *buf)
@@ -128,29 +134,28 @@ uint32_t RTT_find_cb_in_buf(uint8_t *buf)
 }
 uint32_t RTT_find_control_block(uint32_t start_addr, uint32_t addr_range)
 {
-    if (0)
+    if (RTT_control_block.cb_address != 0) // check if control block exists at set address
     {
-        return rtt_config.cb_address;
+        if (RTT_check_control_block(RTT_control_block.cb_address) == RTT_OK)
+            return RTT_control_block.cb_address;
     }
-    else
+    uint32_t rtt_cb_position = RTT_CB_NOT_FOUND;
+    for (uint32_t i = start_addr;
+         i < (start_addr + addr_range);
+         i += (RTT_MSG_BUF_SIZE - RTT_HEADER_LENGTH)) // minus header length for overlap (Header between blocks)
     {
-        uint32_t rtt_cb_position = RTT_CB_NOT_FOUND;
-        for (uint32_t i = start_addr;
-             i < (start_addr + addr_range);
-             i += (RTT_MSG_BUF_SIZE - RTT_HEADER_LENGTH)) // minus header length for overlap (Header between blocks)
-        {
-            uint32_t transfer_error = transfer_mem32_block(i, RTT_MSG_BUF_SIZE / 4, rtt_msg_buf);
+        uint32_t transfer_error = transfer_mem32_block(i, RTT_MSG_BUF_SIZE / 4, rtt_msg_buf);
 
-            rtt_cb_position = RTT_find_cb_in_buf(rtt_transfer_contents);
-            if (rtt_cb_position != RTT_CB_NOT_FOUND)
-            { // header found!
-                uint32_t rtt_cb_address = i + rtt_cb_position;
-                rtt_config.cb_address = rtt_cb_address;
-                RTT_read_control_block(rtt_config.cb_address);
-                test_RTT_readBuf1();
-                return rtt_cb_address;
-            }
+        rtt_cb_position = RTT_find_cb_in_buf(rtt_transfer_contents);
+        if (rtt_cb_position != RTT_CB_NOT_FOUND)
+        { // header found!
+            uint32_t rtt_cb_address = i + rtt_cb_position;
+            RTT_control_block.cb_address = rtt_cb_address;
+            RTT_read_control_block(RTT_control_block.cb_address);
+            test_RTT_readBuf1(); // TODO remove temp
+            return rtt_cb_address;
         }
     }
+
     return RTT_CB_NOT_FOUND;
 }

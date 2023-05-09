@@ -13,14 +13,7 @@
 
 typedef struct
 {
-    uint32_t scan_start_address;
-    uint32_t scan_range;
-    uint32_t cb_address;
-} rtt_config_t;
-
-typedef struct
-{
-    char acID[16];              // Initialization string
+    uint32_t cb_address;        // Control block address
     uint32_t MaxNumUpBuffers;   // Maximum number of up-buffers (application-to-host)
     uint32_t MaxNumDownBuffers; // Maximum number of down-buffers (host-to-application)
                                 // RTT buffer structures will follow
