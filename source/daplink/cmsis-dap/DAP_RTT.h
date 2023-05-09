@@ -2,12 +2,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define RTT_MSG_BUF_SIZE (512)
+#define RTT_MSG_BUF_SIZE (512) // minimum 128
 #define RTT_HEADER_LENGTH (12)
 #define RTT_MAX_NUM_UP_BUFFERS (8)
 #define RTT_MAX_NUM_DOWN_BUFFERS (8)
 
 #define RTT_CB_NOT_FOUND (0xFFFFFFFF)
+#define RTT_FAILURE (0xDEADBEEF)
+#define RTT_OK (0x00000000)
 
 typedef struct
 {

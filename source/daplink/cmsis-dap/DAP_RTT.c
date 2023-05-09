@@ -7,7 +7,7 @@
 #include <string.h>
 
 uint8_t rtt_request_buf[6];
-const uint8_t rtt_header[] = "SEGGER RTT";
+const uint8_t rtt_header[] = "SEGGER RTT\0\0\0\0\0\0";
 static uint8_t rtt_msg_buf[RTT_MSG_BUF_SIZE + 4];
 static uint8_t *rtt_transfer_contents = rtt_msg_buf + 4;
 static SEGGER_RTT_BUFFER RTT_UpBuffers[RTT_MAX_NUM_UP_BUFFERS];
@@ -56,56 +56,53 @@ uint32_t transfer_mem32_block(uint32_t address, uint16_t blocks, uint8_t *respon
     readBlocks(blocks, response);
 }
 
-uint32_t RTT_read_control_block(uint32_t cb_addr)
+uint32_t RTT_read_control_block(uint32_t rtt_cb_address)
 {
-    uint32_t transfer_error = transfer_mem32_block(cb_addr, RTT_MSG_BUF_SIZE / 4, rtt_msg_buf);
+    uint32_t transfer_error = transfer_mem32_block(rtt_cb_address, 6, rtt_msg_buf);
     uint8_t *buf_ptr = rtt_transfer_contents;
-    buf_ptr += 16; // SEGGER RTT\0\0\0\0\0\0
-
+    for (uint32_t i = 0; i < 16; i++)
+    {
+        if (buf_ptr[i] != rtt_header[i])
+        {
+            return RTT_FAILURE;
+        }
+    }
     // Number of Buffers
-    uint32_t num_up_buf = deserialize_uint32(buf_ptr);
-    buf_ptr += 4;
-    uint32_t num_down_buf = deserialize_uint32(buf_ptr);
-    buf_ptr += 4;
+    uint32_t num_up_buf = deserialize_uint32(buf_ptr + 16);
+    uint32_t num_down_buf = deserialize_uint32(buf_ptr + 20);
 
     // Initialize Buffers
     for (uint32_t i = 0; i < num_up_buf; i++)
     {
+        transfer_error = transfer_mem32_block(rtt_cb_address + 24 + (i * 24), 6, rtt_msg_buf);
         RTT_UpBuffers[i].sName = (char *)deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
-        RTT_UpBuffers[i].pBuffer = (char *)deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
-        RTT_UpBuffers[i].SizeOfBuffer = deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
-        RTT_UpBuffers[i].WrOff = deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
-        RTT_UpBuffers[i].RdOff = deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
-        RTT_UpBuffers[i].Flags = deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
+        RTT_UpBuffers[i].pBuffer = (char *)deserialize_uint32(buf_ptr + 4);
+        RTT_UpBuffers[i].SizeOfBuffer = deserialize_uint32(buf_ptr + 8);
+        RTT_UpBuffers[i].WrOff = deserialize_uint32(buf_ptr + 12);
+        RTT_UpBuffers[i].RdOff = deserialize_uint32(buf_ptr + 16);
+        RTT_UpBuffers[i].Flags = deserialize_uint32(buf_ptr + 20);
     }
     for (uint32_t i = 0; i < num_down_buf; i++)
     {
+        transfer_error = transfer_mem32_block(rtt_cb_address + 24 + (24 * num_up_buf) + (i * 24), 6, rtt_msg_buf);
         RTT_DownBuffers[i].sName = (char *)deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
-        RTT_DownBuffers[i].pBuffer = (char *)deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
-        RTT_DownBuffers[i].SizeOfBuffer = deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
-        RTT_DownBuffers[i].WrOff = deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
-        RTT_DownBuffers[i].RdOff = deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
-        RTT_DownBuffers[i].Flags = deserialize_uint32(buf_ptr);
-        buf_ptr += 4;
+        RTT_DownBuffers[i].pBuffer = (char *)deserialize_uint32(buf_ptr + 4);
+        RTT_DownBuffers[i].SizeOfBuffer = deserialize_uint32(buf_ptr + 8);
+        RTT_DownBuffers[i].WrOff = deserialize_uint32(buf_ptr + 12);
+        RTT_DownBuffers[i].RdOff = deserialize_uint32(buf_ptr + 16);
+        RTT_DownBuffers[i].Flags = deserialize_uint32(buf_ptr + 20);
     }
-
-    return 1;
+    return RTT_OK;
 }
 
 uint32_t test_RTT_readBuf1(void)
 {
     uint32_t transfer_error = transfer_mem32_block((uint32_t)RTT_UpBuffers[0].pBuffer, RTT_UpBuffers[0].SizeOfBuffer / 4, rtt_msg_buf);
+}
+
+uint32_t RTT_readBufs(void)
+{
+    
 }
 
 uint32_t RTT_find_cb_in_buf(uint8_t *buf)
