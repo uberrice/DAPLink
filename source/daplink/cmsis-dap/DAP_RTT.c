@@ -42,7 +42,7 @@ uint32_t readBlocks(uint16_t blocks, uint8_t *response)
     return DAP_ProcessCommand(rtt_request_buf, response);
 }
 
-uint32_t transfer_mem32_block(uint32_t address, uint16_t blocks, uint8_t *response)
+uint32_t read_mem32_block(uint32_t address, uint16_t blocks, uint8_t *response)
 {
     DAP_TransferAbort = 0U;
 
@@ -54,7 +54,7 @@ uint32_t transfer_mem32_block(uint32_t address, uint16_t blocks, uint8_t *respon
 
 uint32_t RTT_check_control_block(uint32_t rtt_cb_address)
 {
-    uint32_t transfer_error = transfer_mem32_block(rtt_cb_address, 4, rtt_msg_buf);
+    uint32_t transfer_error = read_mem32_block(rtt_cb_address, 4, rtt_msg_buf);
     for (uint32_t i = 0; i < 16; i++)
     {
         if (rtt_transfer_contents[i] != rtt_header[i])
@@ -71,7 +71,7 @@ uint32_t RTT_read_control_block(uint32_t rtt_cb_address)
     {
         return RTT_FAILURE;
     }
-    uint32_t transfer_error = transfer_mem32_block(rtt_cb_address + 16, 2, rtt_msg_buf);
+    uint32_t transfer_error = read_mem32_block(rtt_cb_address + 16, 2, rtt_msg_buf);
 
     // Number of Buffers
     RTT_control_block.MaxNumUpBuffers = deserialize_uint32(rtt_transfer_contents);
@@ -81,7 +81,7 @@ uint32_t RTT_read_control_block(uint32_t rtt_cb_address)
     for (uint32_t i = 0; i < RTT_control_block.MaxNumUpBuffers; i++)
     {
         RTT_UpBuffers[i].address = rtt_cb_address + 24 + (i * 24);
-        transfer_error = transfer_mem32_block(RTT_UpBuffers[i].address, 6, rtt_msg_buf);
+        transfer_error = read_mem32_block(RTT_UpBuffers[i].address, 6, rtt_msg_buf);
         RTT_UpBuffers[i].sName = (char *)deserialize_uint32(rtt_transfer_contents);
         RTT_UpBuffers[i].pBuffer = (char *)deserialize_uint32(rtt_transfer_contents + 4);
         RTT_UpBuffers[i].SizeOfBuffer = deserialize_uint32(rtt_transfer_contents + 8);
@@ -92,7 +92,7 @@ uint32_t RTT_read_control_block(uint32_t rtt_cb_address)
     for (uint32_t i = 0; i < RTT_control_block.MaxNumDownBuffers; i++)
     {
         RTT_DownBuffers[i].address = rtt_cb_address + 24 + (24 * RTT_control_block.MaxNumUpBuffers) + (i * 24);
-        transfer_error = transfer_mem32_block(RTT_DownBuffers[i].address, 6, rtt_msg_buf);
+        transfer_error = read_mem32_block(RTT_DownBuffers[i].address, 6, rtt_msg_buf);
         RTT_DownBuffers[i].sName = (char *)deserialize_uint32(rtt_transfer_contents);
         RTT_DownBuffers[i].pBuffer = (char *)deserialize_uint32(rtt_transfer_contents + 4);
         RTT_DownBuffers[i].SizeOfBuffer = deserialize_uint32(rtt_transfer_contents + 8);
@@ -105,7 +105,7 @@ uint32_t RTT_read_control_block(uint32_t rtt_cb_address)
 
 uint32_t test_RTT_readBuf1(void)
 {
-    uint32_t transfer_error = transfer_mem32_block((uint32_t)RTT_UpBuffers[0].pBuffer, RTT_UpBuffers[0].SizeOfBuffer / 4, rtt_msg_buf);
+    uint32_t transfer_error = read_mem32_block((uint32_t)RTT_UpBuffers[0].pBuffer, RTT_UpBuffers[0].SizeOfBuffer / 4, rtt_msg_buf);
 }
 
 uint32_t RTT_readBufs(void)
@@ -145,7 +145,7 @@ uint32_t RTT_find_control_block(uint32_t start_addr, uint32_t addr_range)
          i < (start_addr + addr_range);
          i += (RTT_MSG_BUF_SIZE - RTT_HEADER_LENGTH)) // minus header length for overlap (Header between blocks)
     {
-        uint32_t transfer_error = transfer_mem32_block(i, RTT_MSG_BUF_SIZE / 4, rtt_msg_buf);
+        uint32_t transfer_error = read_mem32_block(i, RTT_MSG_BUF_SIZE / 4, rtt_msg_buf);
 
         rtt_cb_position = RTT_find_cb_in_buf(rtt_transfer_contents);
         if (rtt_cb_position != RTT_CB_NOT_FOUND)
