@@ -52,6 +52,50 @@ uint32_t read_mem32_block(uint32_t address, uint16_t blocks, uint8_t *response)
     readBlocks(blocks, response);
 }
 
+/** Write a single uint32 word to the DAP port at the specified address in memory of the target using SWD
+\param address  address to write to
+\param data     data to be written to the address
+\return         RTT_OK or RTT_FAILURE, depending on if command was successful
+ */
+uint32_t RTT_swd_write_uint32_word(uint32_t address, uint32_t data) // TODO Test
+{
+    swd_write_ap(AP_CSW, CSW_SIZE32 | CSW_ADDRINC | CSW_DBGSTAT | CSW_HPROT | CSW_MSTRTYPE); // set up CSW (remembers state)
+    swd_write_ap(AP_TAR, address);                                                           // set address
+    uint32_t retry = DAP_Data.transfer.retry_count;
+    uint32_t response;
+    do
+    {
+        response = SWD_Transfer(DAP_TRANSFER_APnDP | AP_DRW, &data); // write DRW register
+    } while ((response == DAP_TRANSFER_WAIT) && retry-- && !DAP_TransferAbort);
+    if (response != DAP_TRANSFER_OK)
+    {
+        return RTT_FAILURE;
+    }
+    return RTT_OK;
+}
+
+/** Read a single uint32 word from the DAP port at the specified address in memory of the target using SWD
+\param address  address to read from
+\param data     data to be read from the address
+\return         RTT_OK or RTT_FAILURE, depending on if command was successful
+ */
+uint32_t RTT_swd_read_uint32_word(uint32_t address, uint32_t * data) // TODO Test
+{
+    swd_write_ap(AP_CSW, CSW_SIZE32 | CSW_ADDRINC | CSW_DBGSTAT | CSW_HPROT | CSW_MSTRTYPE); // set up CSW (remembers state)
+    swd_write_ap(AP_TAR, address);                                                           // set address
+    uint32_t retry = DAP_Data.transfer.retry_count;
+    uint32_t response;
+    do
+    {
+        response = SWD_Transfer(DAP_TRANSFER_RnW | DAP_TRANSFER_APnDP | AP_DRW, &data); // read DRW register
+    } while ((response == DAP_TRANSFER_WAIT) && retry-- && !DAP_TransferAbort);
+    if (response != DAP_TRANSFER_OK)
+    {
+        return RTT_FAILURE;
+    }
+    return RTT_OK;
+}
+
 uint32_t RTT_check_control_block(uint32_t rtt_cb_address)
 {
     uint32_t transfer_error = read_mem32_block(rtt_cb_address, 4, rtt_msg_buf);
@@ -65,7 +109,7 @@ uint32_t RTT_check_control_block(uint32_t rtt_cb_address)
     return RTT_OK;
 }
 
-uint32_t RTT_read_control_block(uint32_t rtt_cb_address)
+uint32_t RTT_read_control_block(uint32_t rtt_cb_address) // TODO test modifications
 {
     if (RTT_check_control_block(rtt_cb_address) != RTT_OK)
     {
@@ -108,17 +152,17 @@ uint32_t test_RTT_readBuf1(void)
     uint32_t transfer_error = read_mem32_block((uint32_t)RTT_UpBuffers[0].pBuffer, RTT_UpBuffers[0].SizeOfBuffer / 4, rtt_msg_buf);
 }
 
-uint32_t RTT_readBufs(void)
+uint32_t RTT_read_bufs(void)
 {
 }
 
 uint32_t RTT_find_cb_in_buf(uint8_t *buf)
 {
     uint8_t flag = 1;
-    for (uint32_t i = 0; i < RTT_MSG_BUF_SIZE - strlen(rtt_header); i++)
+    for (uint32_t i = 0; i < RTT_MSG_BUF_SIZE - 16; i++)
     {
         flag = 1;
-        for (uint16_t j = 0; j < strlen(rtt_header); j++)
+        for (uint16_t j = 0; j < 16; j++)
         {
             if (buf[i + j] != rtt_header[j])
             {
