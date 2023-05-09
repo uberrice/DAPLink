@@ -21,6 +21,7 @@ typedef struct
 
 typedef struct
 {
+    uint32_t address;      // Address where buffer descriptor is in target memory
     char *sName;           // Pointer to name of buffer
     char *pBuffer;         // Pointer to the buffer
     uint32_t SizeOfBuffer; // Size of the buffer
