@@ -152,8 +152,32 @@ uint32_t test_RTT_readBuf1(void)
     uint32_t transfer_error = read_mem32_block((uint32_t)RTT_UpBuffers[0].pBuffer, RTT_UpBuffers[0].SizeOfBuffer / 4, rtt_msg_buf);
 }
 
-uint32_t RTT_read_bufs(void)
+uint32_t RTT_read_up_buffers(void)
 {
+    for(uint32_t i = 0; i < RTT_control_block.MaxNumUpBuffers; i++)
+    {
+        if(RTT_UpBuffers[i].address != 0)
+        {
+            //update pointers
+            uint32_t transfer_error = read_mem32_block(RTT_UpBuffers[i].address + RTT_BUFFER_POSITION_OFFSET, 2, rtt_msg_buf);
+            RTT_UpBuffers[i].WrOff = deserialize_uint32(rtt_transfer_contents);
+            RTT_UpBuffers[i].RdOff = deserialize_uint32(rtt_transfer_contents+4);
+
+            if(RTT_UpBuffers[i].WrOff != RTT_UpBuffers[i].RdOff){ // new data
+                if(RTT_UpBuffers[i].WrOff > RTT_UpBuffers[i].RdOff)
+                {   //no loop in ringbuffer
+                    // TODO read with read_mem32 to buffer for up buffers
+                    read_mem32_block((uint32_t)RTT_UpBuffers[i].pBuffer + RTT_UpBuffers[i].RdOff, ((RTT_UpBuffers[i].WrOff - RTT_UpBuffers[i].RdOff) / 4) + 1, rtt_msg_buf); //FIXME - This reads too much data, 1-4 bytes. Remove manually? Other function?
+                }
+                else
+                {   //loop in ringbuffer
+                    // Todo read with read_mem32 to buffer for up memories; once to end of buffer (RTT_UpBuffers[i].SizeOfBuffer), once from start to write pointer
+                }
+            }
+
+        }
+    }
+
 }
 
 uint32_t RTT_find_cb_in_buf(uint8_t *buf)
