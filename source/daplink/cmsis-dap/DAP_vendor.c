@@ -223,8 +223,15 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor29: { // VENDOR 29: Current Measurement test
         // can set resistor state and current mode from request bytes, then measures once and responds
         uint8_t resstate = *request++;
-        uint8_t currstate = *request;
-        set_TargetPowerDisconnect(true);
+        uint8_t currstate = *request++;
+        uint8_t power_disconnect = *request;
+        if(power_disconnect){
+            set_TargetPowerDisconnect(true);
+        }
+        else
+        {
+            set_TargetPowerDisconnect(false);
+        }
         if(currstate == 0)
         {
             set_LPADC0_currentMode(LPADC_current_low_sens);
