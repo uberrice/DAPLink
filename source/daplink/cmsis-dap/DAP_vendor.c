@@ -211,12 +211,12 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor28: { // read LPADC and PC, and return them both
         uint16_t current = LPADC_polling_current_read();
         uint32_t pc = PC_programcounter_read_and_clear();
-        *response++ = (uint8_t) current>>8;
-        *response++ = (uint8_t) current;
-        *response++ = (uint8_t) pc>>24;
-        *response++ = (uint8_t) pc>>16;
-        *response++ = (uint8_t) pc>>8;
-        *response++ = (uint8_t) pc;
+        *response++ = current>>8;
+        *response++ = current;
+        *response++ = pc>>24;
+        *response++ = pc>>16;
+        *response++ = pc>>8;
+        *response++ = pc;
         num += 6; //6 response bytes
         break;
     }

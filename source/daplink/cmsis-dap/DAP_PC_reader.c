@@ -89,8 +89,6 @@ uint32_t PC_find_control_block(uint32_t start_addr, uint32_t addr_range, uint32_
         { // header found!
             pc_cb_address = i + pc_cb_offset;
             pc_header_location = pc_cb_address;
-            uint32_t test;
-            PC_swd_read_and_clear(pc_cb_address + 8, &test); // TODO: Test call, remove once done!
             break;
         }
     }
