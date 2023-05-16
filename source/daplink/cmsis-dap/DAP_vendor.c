@@ -40,7 +40,7 @@
 #include "flash_manager.h"
 #include <string.h>
 #include "daplink_vendor_commands.h"
-#include "DAP_RTT.h"
+#include "DAP_PC_reader.h"
 
 #ifdef DRAG_N_DROP_SUPPORT
 #include "file_stream.h"
@@ -205,7 +205,7 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor28: break;
     case ID_DAP_Vendor29: break;
     case ID_DAP_Vendor30: {
-        uint32_t found = RTT_find_control_block(0x10000000,0x4000);
+        uint32_t found = PC_find_control_block(0x10000000,0x4000, 0x100);
         *response++ = 4;
         *response++ = found>>24;
         *response++ = found>>16;
