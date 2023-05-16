@@ -43,6 +43,7 @@
 #include "mat_vendor_commands.h"
 
 #include "lpadc.h"
+#include "DAP_PC_reader.h"
 
 #ifdef DRAG_N_DROP_SUPPORT
 #include "file_stream.h"
@@ -207,10 +208,20 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor25: break;
     case ID_DAP_Vendor26: break;
     case ID_DAP_Vendor27: break;
-    case ID_DAP_Vendor28: break;
-    case ID_DAP_Vendor29: break;
-    case ID_DAP_Vendor30: { // VENDOR 30: Current Measurement test
-        // TODO: Implement polling LPADC conversion and return
+    case ID_DAP_Vendor28: { // read LPADC and PC, and return them both
+        uint16_t current = LPADC_polling_current_read();
+        uint32_t pc = PC_programcounter_read_and_clear();
+        *response++ = (uint8_t) current>>8;
+        *response++ = (uint8_t) current;
+        *response++ = (uint8_t) pc>>24;
+        *response++ = (uint8_t) pc>>16;
+        *response++ = (uint8_t) pc>>8;
+        *response++ = (uint8_t) pc;
+        num += 6; //6 response bytes
+        break;
+    }
+    case ID_DAP_Vendor29: { // VENDOR 29: Current Measurement test
+        // can set resistor state and current mode from request bytes, then measures once and responds
         uint8_t resstate = *request++;
         uint8_t currstate = *request;
         set_TargetPowerDisconnect(true);
@@ -227,6 +238,16 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         *response++ = res>>8;
         *response++ = (res & 0xFF);
         num+=2;
+        break;
+    }
+    case ID_DAP_Vendor30: { //find control block
+        uint32_t found = PC_find_control_block(0x10000000,0x4000, 0x100);
+        *response++ = 4;
+        *response++ = found>>24;
+        *response++ = found>>16;
+        *response++ = found>>8;
+        *response++ = found;
+        num += 5; // increment response count by ID length + length byte
         break;
     }
     case ID_DAP_TestCommand: {
