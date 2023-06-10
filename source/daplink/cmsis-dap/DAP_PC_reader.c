@@ -9,7 +9,7 @@
 #include <string.h>
 
 const uint8_t pc_header[8] = "PC loc\0\0";
-static uint32_t pc_header_location = 0;
+static uint32_t pc_header_location = PC_CB_NOT_FOUND;
 
 uint32_t PC_swd_read_and_clear(uint32_t address, uint32_t * data){
     swd_write_ap(AP_CSW, CSW_SIZE32 | CSW_DBGSTAT | CSW_HPROT | CSW_MSTRTYPE);                  // set up CSW (remembers state)
@@ -20,8 +20,8 @@ uint32_t PC_swd_read_and_clear(uint32_t address, uint32_t * data){
 
 uint32_t PC_programcounter_read_and_clear(void)
 {
-    uint32_t pc = PC_CB_NOT_FOUND;
-    if(pc_header_location != 0)
+    uint32_t pc = PC_BUFFER_EMPTY;
+    if(pc_header_location != PC_CB_NOT_FOUND)
     {
         PC_swd_read_and_clear(pc_header_location + sizeof(pc_header), &pc);
     }
@@ -78,20 +78,23 @@ uint32_t PC_find_control_block(uint32_t start_addr, uint32_t addr_range, uint32_
     stride -= (stride % 4); // read function reads in 32-bit blocks, so reads have to happen in 32-bit increments
 
     uint8_t * buf = (uint8_t*) malloc(stride * sizeof(uint8_t));
-    for (uint32_t i = start_addr;
-         i < (start_addr + addr_range);
-         i += (stride - sizeof(pc_header))) // minus header length for overlap (to ensure header contained in one block)
+    if (buf != NULL)
     {
-        uint32_t transfer_error = PC_swd_read_words(i, stride / 4, buf);
-        pc_cb_offset = PC_find_cb_in_buf(buf, stride);
+        for (uint32_t i = start_addr;
+            i < (start_addr + addr_range);
+            i += (stride - sizeof(pc_header))) // minus header length for overlap (to ensure header contained in one block)
+        {
+            uint32_t transfer_error = PC_swd_read_words(i, stride / 4, buf);
+            pc_cb_offset = PC_find_cb_in_buf(buf, stride);
 
-        if (pc_cb_offset != PC_CB_NOT_FOUND)
-        { // header found!
-            pc_cb_address = i + pc_cb_offset;
-            pc_header_location = pc_cb_address;
-            break;
+            if (pc_cb_offset != PC_CB_NOT_FOUND)
+            { // header found!
+                pc_cb_address = i + pc_cb_offset;
+                pc_header_location = pc_cb_address;
+                break;
+            }
         }
+        free(buf);
     }
-    free(buf);
     return pc_cb_address;
 }

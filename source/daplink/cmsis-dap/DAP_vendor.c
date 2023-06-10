@@ -207,7 +207,15 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor24: break;
     case ID_DAP_Vendor25: break;
     case ID_DAP_Vendor26: break;
-    case ID_DAP_Vendor27: break;
+    case ID_DAP_Vendor27: { // vendor 27: get calibration values and return them
+        uint32_t calib_values = get_LPADC0B_calibration_values();
+        *response++ = calib_values>>24;
+        *response++ = calib_values>>16;
+        *response++ = calib_values>>8;
+        *response++ = calib_values;
+        num += 4;
+        break;
+    }
     case ID_DAP_Vendor28: { // read LPADC and PC, and return them both
         uint16_t current = LPADC_polling_current_read();
         uint32_t pc = PC_programcounter_read_and_clear();
