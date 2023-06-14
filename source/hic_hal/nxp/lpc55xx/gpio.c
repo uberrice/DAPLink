@@ -28,6 +28,7 @@
 #include "fsl_clock.h"
 #include "fsl_iocon.h"
 #include "fsl_reset.h"
+#include "lpadc.h"
 
 __WEAK void board_gpio_init(void)
 {
@@ -72,6 +73,8 @@ void gpio_init(void)
     GPIO->B[LED_A_PORT][LED_A_PIN] = 0;
 
     board_gpio_init();
+    LPADC0_InitPins();
+    LPADC0_Init();
 }
 
 void gpio_set_board_power(bool powerEnabled)

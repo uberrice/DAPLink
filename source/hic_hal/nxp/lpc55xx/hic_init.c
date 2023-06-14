@@ -30,7 +30,6 @@
 #include "util.h"
 #include "flash_hal.h"
 #include "pin_mux.h"
-#include "lpadc.h"
 
 #include "LPC55S69_cm33_core0_features.h"
 
@@ -163,11 +162,8 @@ void BOARD_BootClockPLL150M(void)
 void sdk_init(void)
 {
     BOARD_BootClockFROHF96M();
-    // TODO: Add HIC current measurement / LPADC init here
     POWER_SetBodVbatLevel(kPOWER_BodVbatLevel1650mv, kPOWER_BodHystLevel50mv, false);
-    LPADC0_InitPins();
-    LPADC0_Init();
-
+    
     hic_crc_init();
 }
 

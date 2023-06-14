@@ -6,7 +6,7 @@
 #include "fsl_gpio.h"
 #include "pin_mux.h"
 #include "IO_Config.h"
-#include "DAP.h"
+#include "DAP_config.h"
 
 #include "lpadc.h"
 
@@ -17,6 +17,18 @@ static lpadc_current_mode_t current_mode_state = LPADC_current_low_sens;
 
 //For jumper position:
 static bool measurement_jumper = true; // true: low range, false = high range
+
+
+void LPADC_delay(uint32_t delay) {
+  delay *= ((CPU_CLOCK/1000U) + (3U-1U)) / 3U;
+  __ASM volatile (
+  ".syntax unified\n"
+  "0:\n\t"
+    "subs %0,%0,#1\n\t"
+    "bne  0b\n"
+  : "+l" (delay) : : "cc"
+  );
+}
 
 uint16_t get_LPADC0B(void)
 {
@@ -85,12 +97,12 @@ void LPADC0_calibrate(void)
         //'low' current range jumper
         set_LPADC0_currentMode(LPADC_current_high_sens);
         set_CalibrationResistorState(SET_CALRES_1);
-        Delayms(10);
+        LPADC_delay(10);
         calib_high_sens = get_LPADC0B();
 
         set_LPADC0_currentMode(LPADC_current_low_sens);
         set_CalibrationResistorState(SET_CALRES_2);
-        Delayms(10);
+        LPADC_delay(10);
         calib_low_sens = get_LPADC0B();
     }
     else
@@ -98,12 +110,12 @@ void LPADC0_calibrate(void)
         //'high' current range jumper
         set_LPADC0_currentMode(LPADC_current_high_sens);
         set_CalibrationResistorState(SET_CALRES_3);
-        Delayms(10);
+        LPADC_delay(10);
         calib_high_sens = get_LPADC0B();
 
         set_LPADC0_currentMode(LPADC_current_low_sens);
         set_CalibrationResistorState(SET_CALRES_4);
-        Delayms(10);
+        LPADC_delay(10);
         calib_low_sens = get_LPADC0B();
     }
     set_CalibrationResistorState(0);
