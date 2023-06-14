@@ -13,7 +13,7 @@
 static uint16_t calib_low_sens = 0;
 static uint16_t calib_high_sens = 0;
 
-static lpadc_current_mode_t current_mode_state = LPADC_current_high_sens;
+static lpadc_current_mode_t current_mode_state = LPADC_current_low_sens;
 
 //For jumper position:
 static bool measurement_jumper = true; // true: low range, false = high range
@@ -70,9 +70,14 @@ void set_LPADC0_currentMode(lpadc_current_mode_t current_mode)
     }
 }
 
+lpadc_current_mode_t get_LPADC0_currentMode(void)
+{
+    return current_mode_state;
+}
+
 void LPADC0_calibrate(void)
 {
-    set_TargetPowerDisconnect(1);
+    set_TargetPowerDisconnect(true);
     set_CalibrationResistorState(0);
 
     if(measurement_jumper) // TODO: implement check of Jumper position with ADC0_4
@@ -101,8 +106,8 @@ void LPADC0_calibrate(void)
         Delayms(10);
         calib_low_sens = get_LPADC0B();
     }
-
-    set_TargetPowerDisconnect(0);
+    set_CalibrationResistorState(0);
+    set_TargetPowerDisconnect(false);
 }
 
 void LPADC0_Init(void)
@@ -146,7 +151,8 @@ void LPADC0_Init(void)
     // END INITIALIZE ADC
 
     LPADC0_calibrate();
-    set_TargetPowerDisconnect(0); //reconnects target power
+    set_CalibrationResistorState(0); // disconnect calibration resistors
+    set_TargetPowerDisconnect(0); //reconnect target power
     set_LPADC0_currentMode(LPADC_current_low_sens);
 }
 

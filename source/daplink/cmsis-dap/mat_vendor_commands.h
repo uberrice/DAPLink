@@ -25,5 +25,10 @@
 //! @name DAPLink vendor-specific CMSIS-DAP command IDs
 //@{
 #define ID_DAP_TestCommand              ID_DAP_Vendor31
+#define ID_DAP_FindControlBlock         ID_DAP_Vendor30
+#define ID_DAP_MeasurementSettings      ID_DAP_Vendor29
+#define ID_DAP_ReadCurrentAndPC         ID_DAP_Vendor28
+#define ID_DAP_GetCalibrationValues     ID_DAP_Vendor27
+
 //@}
 

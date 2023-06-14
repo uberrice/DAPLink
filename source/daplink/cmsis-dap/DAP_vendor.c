@@ -206,8 +206,14 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor23: break;
     case ID_DAP_Vendor24: break;
     case ID_DAP_Vendor25: break;
-    case ID_DAP_Vendor26: break;
-    case ID_DAP_Vendor27: { // vendor 27: get calibration values and return them
+    case ID_DAP_Vendor26: { // VENDOR 28: read LPADC and PC, and return them both
+        uint16_t current = LPADC_polling_current_read();
+        *response++ = current>>8;
+        *response++ = current;
+        num += 2;
+        break;
+    }
+    case ID_DAP_GetCalibrationValues: { // VENDOR 27: get calibration values and return them
         uint32_t calib_values = get_LPADC0B_calibration_values();
         *response++ = calib_values>>24;
         *response++ = calib_values>>16;
@@ -216,7 +222,7 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num += 4;
         break;
     }
-    case ID_DAP_Vendor28: { // read LPADC and PC, and return them both
+    case ID_DAP_ReadCurrentAndPC: { // VENDOR 28: read LPADC and PC, and return them both
         uint16_t current = LPADC_polling_current_read();
         uint32_t pc = PC_programcounter_read_and_clear();
         *response++ = current>>8;
@@ -228,18 +234,9 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num += 6; //6 response bytes
         break;
     }
-    case ID_DAP_Vendor29: { // VENDOR 29: Current Measurement test
-        // can set resistor state and current mode from request bytes, then measures once and responds
-        uint8_t resstate = *request++;
+    case ID_DAP_MeasurementSettings: { // VENDOR 29: Current Measurement Settings
+        // can set the current mode (high or low sensitivity)
         uint8_t currstate = *request++;
-        uint8_t power_disconnect = *request;
-        if(power_disconnect){
-            set_TargetPowerDisconnect(true);
-        }
-        else
-        {
-            set_TargetPowerDisconnect(false);
-        }
         if(currstate == 0)
         {
             set_LPADC0_currentMode(LPADC_current_low_sens);
@@ -248,24 +245,23 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         {
             set_LPADC0_currentMode(LPADC_current_high_sens);
         }
-        set_CalibrationResistorState(resstate);
-        uint16_t res = LPADC_polling_current_read();
-        *response++ = res>>8;
-        *response++ = (res & 0xFF);
-        num+=2;
+        *response++ = get_LPADC0_currentMode();
+        num += 1;
         break;
     }
-    case ID_DAP_Vendor30: { //find control block
-        uint32_t found = PC_find_control_block(0x10000000,0x4000, 0x100);
-        *response++ = 4;
+    case ID_DAP_FindControlBlock: {  // VENDOR 30: Find control block
+        uint32_t start_addr = (*request++<<24) + (*request++<<16) + (*request++<<8) + (*request++);
+        uint32_t addr_range = (*request++<<24) + (*request++<<16) + (*request++<<8) + (*request++);
+        uint32_t stride = (*request++<<24) + (*request++<<16) + (*request++<<8) + (*request++);
+        uint32_t found = PC_find_control_block(start_addr,addr_range, stride);
         *response++ = found>>24;
         *response++ = found>>16;
         *response++ = found>>8;
         *response++ = found;
-        num += 5; // increment response count by ID length + length byte
+        num += 4;
         break;
     }
-    case ID_DAP_TestCommand: {
+    case ID_DAP_TestCommand: { // VENDOR 31: Test command
         uint16_t len = strlen(testStr);
         *response++ = len;
         for (uint16_t i = 0; i < 810; i++)

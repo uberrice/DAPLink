@@ -32,6 +32,7 @@ void set_TargetPowerDisconnect(bool val);
 
 void set_LPADC0_currentMode(lpadc_current_mode_t current_mode);
 
+lpadc_current_mode_t get_LPADC0_currentMode(void);
 
 /// @brief Initializes the LPADC0 peripheral in order to measure current
 void LPADC0_Init(void);
